@@ -67,7 +67,7 @@ tracks:
     last_version: 3.5.3
     name: dynamic-graph-python
     patches: null
-    release_inc: '1'
+    release_inc: '2'
     release_repo_url: https://github.com/stack-of-tasks/dynamic-graph-python-ros-release.git
     release_tag: v:{version}
     ros_distro: melodic
