@@ -41,7 +41,7 @@
 #.rst:
 # .. variable:: PYTHON_SITELIB
 #
-#  Absolute path where Python files will be installed.
+#  Relative path where Python files will be installed.
 
 #.rst:
 # .. variable:: PYTHON_EXT_SUFFIX
@@ -203,12 +203,6 @@ MACRO(FINDPYTHON)
     IF(PYTHON_PACKAGES_DIR)
       STRING(REGEX REPLACE "(site-packages|dist-packages)" "${PYTHON_PACKAGES_DIR}" PYTHON_SITELIB "${PYTHON_SITELIB}")
     ENDIF(PYTHON_PACKAGES_DIR)
-  ELSE(NOT PYTHON_SITELIB)
-    IF(WIN32)
-      STRING(REPLACE "\\" "/" PYTHON_SITELIB ${PYTHON_SITELIB})
-      MESSAGE(STATUS "python: ${PYTHON_SITELIB}")
-      SET(PYTHON_SITELIB ${PYTHON_SITELIB} PARENT_SCOPE)
-    ENDIF(WIN32)
   ENDIF(NOT PYTHON_SITELIB)
 
   MESSAGE(STATUS "Python site lib: ${PYTHON_SITELIB}")
@@ -282,25 +276,30 @@ ENDMACRO(FINDPYTHON)
 #
 MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
-  # By default the __init__.py file is installed.
-  SET(INSTALL_INIT_PY 1)
-  SET(SOURCE_PYTHON_MODULE "cmake/dynamic_graph/python-module-py.cc")
+  set(options DONT_INSTALL_INIT_PY)
+  set(oneValueArgs SOURCE_PYTHON_MODULE MODULE_HEADER)
+  cmake_parse_arguments(ARG "${options}" "${oneValueArgs}"
+                        "${multiValueArgs}" ${ARGN} )
 
-  # Check if there is optional parameters.
-  set(extra_macro_args ${ARGN})
-  list(LENGTH extra_macro_args num_extra_args)
-  if( ${num_extra_args} GREATER 0)
-    list(GET extra_macro_args 0 INSTALL_INIT_PY)
-    if( ${num_extra_args} GREATER 1)
-      list(GET extra_macro_args 1 SOURCE_PYTHON_MODULE)
-    endif(${num_extra_args} GREATER 1)
-  endif(${num_extra_args} GREATER 0)
+  # By default the __init__.py file is installed.
+  if(NOT DEFINED ARG_SOURCE_PYTHON_MODULE)
+    set(DYNAMICGRAPH_MODULE_HEADER ${ARG_MODULE_HEADER})
+    configure_file(
+      ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/python-module-py.cc.in
+      ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc
+      @ONLY
+      )
+    SET(ARG_SOURCE_PYTHON_MODULE "${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME}/python-module-py.cc")
+  endif()
 
   IF(NOT DEFINED PYTHONLIBS_FOUND)
     FINDPYTHON()
   ELSEIF(NOT ${PYTHONLIBS_FOUND} STREQUAL "TRUE")
     MESSAGE(FATAL_ERROR "Python has not been found.")
   ENDIF()
+  if(NOT DEFINED Boost_PYTHON_LIBRARIES)
+    MESSAGE(FATAL_ERROR "Boost Python library must have been found to call this macro.")
+  endif()
 
   SET(PYTHON_MODULE ${TARGETNAME})
   # We need to set this policy to old to accept wrap target.
@@ -311,7 +310,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
 
   ADD_LIBRARY(${PYTHON_MODULE}
     MODULE
-    ${PROJECT_SOURCE_DIR}/${SOURCE_PYTHON_MODULE})
+    ${ARG_SOURCE_PYTHON_MODULE})
 
   FILE(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/src/dynamic_graph/${SUBMODULENAME})
 
@@ -325,7 +324,13 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
   IF (UNIX AND NOT APPLE)
     TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} "-Wl,--no-as-needed")
   ENDIF(UNIX AND NOT APPLE)
-  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} ${LIBRARYNAME} ${PYTHON_LIBRARY})
+  TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} ${LIBRARYNAME} ${PYTHON_LIBRARY} dynamic-graph::dynamic-graph)
+  TARGET_LINK_BOOST_PYTHON(${PYTHON_MODULE} ${PUBLIC_KEYWORD})
+  if(PROJECT_NAME STREQUAL "dynamic-graph-python")
+    TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} dynamic-graph-python)
+  else()
+    TARGET_LINK_LIBRARIES(${PYTHON_MODULE} ${PUBLIC_KEYWORD} dynamic-graph-python::dynamic-graph-python)
+  endif()
 
   TARGET_INCLUDE_DIRECTORIES(${PYTHON_MODULE} SYSTEM PRIVATE ${PYTHON_INCLUDE_DIRS})
 
@@ -343,8 +348,8 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
     SET(ENTITY_CLASS_LIST "${ENTITY_CLASS_LIST}${ENTITY}('')\n")
   ENDFOREACH(ENTITY ${NEW_ENTITY_CLASS})
 
-  # Install if INSTALL_INIT_PY is set to 1
-  IF (${INSTALL_INIT_PY} EQUAL 1)
+  # Install if not DONT_INSTALL_INIT_PY
+  if(NOT DONT_INSTALL_INIT_PY)
 
     CONFIGURE_FILE(
       ${PROJECT_SOURCE_DIR}/cmake/dynamic_graph/submodule/__init__.py.cmake
@@ -356,7 +361,7 @@ MACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME LIBRARYNAME TARGETNAME)
       DESTINATION ${PYTHON_INSTALL_DIR}
       )
 
-  ENDIF(${INSTALL_INIT_PY} EQUAL 1)
+  endif()
 
 ENDMACRO(DYNAMIC_GRAPH_PYTHON_MODULE SUBMODULENAME)
 
@@ -398,13 +403,15 @@ ENDMACRO()
 # Build a Python file from the source directory in the build directory.
 #
 MACRO(PYTHON_BUILD MODULE FILE)
-  IF(NOT TARGET compile_pyc)
-    ADD_CUSTOM_TARGET(compile_pyc ALL)
+  # Regex from IsValidTargetName in CMake/Source/cmGeneratorExpression.cxx
+  STRING(REGEX REPLACE "[^A-Za-z0-9_.+-]" "_" compile_pyc "compile_pyc_${CMAKE_CURRENT_SOURCE_DIR}")
+  IF(NOT TARGET ${compile_pyc})
+    ADD_CUSTOM_TARGET(${compile_pyc} ALL)
   ENDIF()
   FILE(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${MODULE}")
 
   ADD_CUSTOM_COMMAND(
-    TARGET compile_pyc
+    TARGET ${compile_pyc}
     PRE_BUILD
     COMMAND
     "${PYTHON_EXECUTABLE}"
