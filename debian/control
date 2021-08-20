@@ -1,0 +1,12 @@
+Source: ros-melodic-dynamic-graph-python
+Section: misc
+Priority: optional
+Maintainer: Guilhem Saurel <guilhem.saurel@laas.fr>
+Build-Depends: debhelper (>= 9.0.0), cmake, doxygen, git, libboost-all-dev, ros-melodic-dynamic-graph, ros-melodic-eigenpy
+Homepage: http://github.com/stack-of-tasks/dynamic-graph-python
+Standards-Version: 3.9.2
+
+Package: ros-melodic-dynamic-graph-python
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libboost-all-dev, ros-melodic-catkin, ros-melodic-dynamic-graph, ros-melodic-eigenpy
+Description: Dynamic graph library Python bindings
