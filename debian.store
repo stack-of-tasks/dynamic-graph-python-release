@@ -1,1 +1,1 @@
-{"base": "d1d59cd", "parent": "debian/melodic/dynamic-graph-python", "previous": "05f1c52", "trim": "", "trimbase": ""}
+{"trim": "", "base": "9b8082d", "trimbase": "", "parent": "debian/melodic/dynamic-graph-python", "previous": "825d007"}
