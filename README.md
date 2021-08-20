@@ -1,3 +1,26 @@
+## dynamic-graph-python (melodic) - 4.0.4-1
+
+The packages in the `dynamic-graph-python` repository were released into the `melodic` distro by running `/usr/bin/bloom-release --rosdistro melodic dynamic-graph-python` on `Fri, 20 Aug 2021 12:54:55 -0000`
+
+The `dynamic-graph-python` package was released.
+
+Version of package(s) in repository `dynamic-graph-python`:
+
+- upstream repository: https://github.com/stack-of-tasks/dynamic-graph-python.git
+- release repository: https://github.com/stack-of-tasks/dynamic-graph-python-ros-release.git
+- rosdistro version: `4.0.3-1`
+- old version: `4.0.3-1`
+- new version: `4.0.4-1`
+
+Versions of tools used:
+
+- bloom version: `0.10.7`
+- catkin_pkg version: `0.4.20`
+- rosdep version: `0.21.0`
+- rosdistro version: `0.8.3`
+- vcstools version: `0.1.42`
+
+
 ## dynamic-graph-python (noetic) - 4.0.3-1
 
 The packages in the `dynamic-graph-python` repository were released into the `noetic` distro by running `/home/nim/.local/bin/bloom-release --rosdistro noetic dynamic-graph-python` on `Wed, 10 Mar 2021 22:51:34 -0000`
