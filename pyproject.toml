@@ -1,0 +1,3 @@
+[tool.black]
+exclude = "cmake"
+extend-exclude = "tests/test_python-syntax_error.py"

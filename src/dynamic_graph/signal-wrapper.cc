@@ -1,20 +1,24 @@
 // Copyright (c) 2018, Joseph Mirabel
 // Authors: Joseph Mirabel (joseph.mirabel@laas.fr)
 
-#include <dynamic-graph/factory.h>
-#include <dynamic-graph/command-bind.h>
-
 #include "dynamic-graph/python/signal-wrapper.hh"
+
+#include <dynamic-graph/command-bind.h>
+#include <dynamic-graph/factory.h>
 
 namespace dynamicgraph {
 namespace python {
-void PythonSignalContainer::signalRegistration(const SignalArray<int>& signals) {
+void PythonSignalContainer::signalRegistration(
+    const SignalArray<int>& signals) {
   Entity::signalRegistration(signals);
 }
 
-void PythonSignalContainer::rmSignal(const std::string& name) { Entity::signalDeregistration(name); }
+void PythonSignalContainer::rmSignal(const std::string& name) {
+  Entity::signalDeregistration(name);
+}
 
-DYNAMICGRAPH_FACTORY_ENTITY_PLUGIN(PythonSignalContainer, "PythonSignalContainer");
+DYNAMICGRAPH_FACTORY_ENTITY_PLUGIN(PythonSignalContainer,
+                                   "PythonSignalContainer");
 
 template <class T, class Time>
 bool SignalWrapper<T, Time>::checkCallable(pyobject c, std::string& error) {
