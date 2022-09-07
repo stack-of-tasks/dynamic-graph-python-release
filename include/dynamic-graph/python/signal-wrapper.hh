@@ -4,12 +4,13 @@
 #ifndef DGPY_SIGNAL_WRAPPER
 #define DGPY_SIGNAL_WRAPPER
 
-#include <boost/python.hpp>
-#include <boost/bind.hpp>
-
+#include <dynamic-graph/entity.h>
 #include <dynamic-graph/linear-algebra.h>
 #include <dynamic-graph/signal.h>
-#include <dynamic-graph/entity.h>
+
+#include <boost/bind.hpp>
+#include <boost/python.hpp>
+
 #include "dynamic-graph/python/python-compat.hh"
 
 namespace dynamicgraph {
@@ -34,7 +35,8 @@ class SignalWrapper : public Signal<T, Time> {
 
   static bool checkCallable(pyobject c, std::string& error);
 
-  SignalWrapper(std::string name, pyobject callable) : parent_t(name), callable(callable) {
+  SignalWrapper(std::string name, pyobject callable)
+      : parent_t(name), callable(callable) {
     typedef boost::function2<T&, T&, Time> function_t;
     function_t f = boost::bind(&SignalWrapper::call, this, _1, _2);
     this->setFunction(f);

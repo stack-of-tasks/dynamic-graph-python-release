@@ -1,15 +1,14 @@
 #ifndef DYNAMIC_GRAPH_PY
 #define DYNAMIC_GRAPH_PY
 
-#include <iostream>
-#include <sstream>
-
-#include <boost/python.hpp>
-#include <boost/python/stl_iterator.hpp>
-
 #include <dynamic-graph/debug.h>
 #include <dynamic-graph/exception-factory.h>
 #include <dynamic-graph/signal-base.h>
+
+#include <boost/python.hpp>
+#include <boost/python/stl_iterator.hpp>
+#include <iostream>
+#include <sstream>
 
 #include "dynamic-graph/python/signal-wrapper.hh"
 
@@ -33,14 +32,16 @@ inline bp::tuple to_py_tuple(Iterator begin, Iterator end) {
 
 template <typename T>
 inline std::vector<T> to_std_vector(const bp::object& iterable) {
-  return std::vector<T>(bp::stl_input_iterator<T>(iterable), bp::stl_input_iterator<T>());
+  return std::vector<T>(bp::stl_input_iterator<T>(iterable),
+                        bp::stl_input_iterator<T>());
 }
 
 void exposeSignals();
 
 // Declare functions defined in other source files
 namespace signalBase {
-SignalBase<int>* createSignalWrapper(const char* name, const char* type, bp::object object);
+SignalBase<int>* createSignalWrapper(const char* name, const char* type,
+                                     bp::object object);
 }  // namespace signalBase
 namespace entity {
 
