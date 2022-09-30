@@ -1,0 +1,24 @@
+From 97ef0c218ffb3e2c2816326d886ec9664d22ad4f Mon Sep 17 00:00:00 2001
+From: Guilhem Saurel <guilhem.saurel@laas.fr>
+Date: Fri, 30 Sep 2022 09:18:33 +0200
+Subject: [PATCH] CMake: force python 3 for noetic
+
+---
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 552615e..dae2dab 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -29,6 +29,7 @@ check_minimal_cxx_standard(14 ENFORCE)
+ 
+ # Project dependencies
+ set(PYTHON_COMPONENTS Interpreter Development NumPy)
++set(PYTHON_EXECUTABLE "/usr/bin/python3")
+ add_project_dependency(dynamic-graph 4.4.0 REQUIRED)
+ add_project_dependency(eigenpy 2.7.10 REQUIRED)
+ set(PYTHON_EXPORT_DEPENDENCY_MACROS
+-- 
+2.25.1
+
